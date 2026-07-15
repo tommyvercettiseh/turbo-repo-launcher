@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+• Nieuw vereenvoudigd kaartdashboard voor alle lokale en gekoppelde repositories
+• Per repository alleen de kernstatussen `Update`, `Updated` en `Publiceer`
+• Compacte preview bij hover zonder het dashboard vol te zetten
+• Zoekfunctie en eenvoudige filters voor updates, bijgewerkte projecten en publicatie
+• GitHub- en mapinstellingen verplaatst naar een rustig uitklapbaar paneel
+• WinGet-detectie hersteld via het volledige WindowsApps-pad
+• Launcher voegt WindowsApps automatisch toe aan PATH voor de actieve sessie
+• Duidelijkere foutmelding wanneer Microsoft App Installer echt ontbreekt
+
 ## 0.3.0
 
 • Volledig modern dashboard met grote projectkaarten, gradients en vector-previews
