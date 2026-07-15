@@ -1,10 +1,37 @@
 {
+  "schema_version": 1,
   "name": "Turbo Repo Launcher",
   "slug": "turbo-repo-launcher",
-  "version": "0.1.0",
-  "description": "Lokale launcher voor GitHub-projecten met moderne dashboard-UI en eenklik start- en sync-acties.",
+  "version": "0.3.0",
+  "description": "Persoonlijke softwarefabriek voor GitHub-projecten: ontdekken, lokaal testen, beheren en veilig publicatieklaar maken.",
   "preview": "docs/previews/latest.svg",
-  "start_command": "Start Turbo Repo Launcher.bat",
-  "default_port": 8787,
-  "health_url": "http://127.0.0.1:8787/health"
+  "tags": ["Python", "FastAPI", "GitHub", "Automation"],
+  "runtime": {
+    "type": "python-fastapi",
+    "port": 8787,
+    "start_command": "Start Turbo Repo Launcher.bat",
+    "health_path": "/health"
+  },
+  "testing": {
+    "command": "python -m pytest -q"
+  },
+  "security": {
+    "public_api": false,
+    "rate_limiting": false,
+    "max_request_seconds": 300
+  },
+  "data": {
+    "mode": "local-json",
+    "provider": null
+  },
+  "deployment": {
+    "enabled": false,
+    "provider": null,
+    "public_url": null
+  },
+  "integrations": {
+    "home_assistant": false,
+    "mqtt": false,
+    "github": true
+  }
 }
