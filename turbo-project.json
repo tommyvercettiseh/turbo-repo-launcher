@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "Turbo Repo Hub",
   "slug": "turbo-repo-launcher",
-  "version": "0.5.0",
+  "version": "0.7.0",
   "description": "Eenvoudige centrale hub voor het herkennen, bijwerken, starten en publiceren van lokale en gekoppelde GitHub-projecten.",
   "preview": "docs/previews/latest.svg",
   "tags": ["Python", "FastAPI", "GitHub", "Automation"],
@@ -32,6 +32,7 @@
   "integrations": {
     "home_assistant": false,
     "mqtt": false,
-    "github": true
+    "github": true,
+    "ftp": true
   }
 }
