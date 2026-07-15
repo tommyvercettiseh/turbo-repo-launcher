@@ -40,6 +40,37 @@ def list_repos():
     return {"repos": RepoService.list_repos(), "repo_root": str(RepoService.get_repo_root())}
 
 
+@app.get("/api/github/status")
+def github_status():
+    return RepoService.github_status()
+
+
+@app.post("/api/github/install")
+def github_install():
+    try:
+        RepoService.install_github_cli()
+        return {"ok": True}
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/api/github/login")
+def github_login():
+    try:
+        RepoService.start_github_login()
+        return {"ok": True}
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/api/github/import")
+def github_import():
+    try:
+        return RepoService.import_github_repos()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @app.post("/api/repos")
 def add_repo(payload: RepoAddRequest):
     try:
