@@ -18,7 +18,7 @@
         <h1>{{ app_name }}</h1>
         <p>Synchroniseer, test en launch al je GitHub-projecten vanuit één moderne lokale hub.</p>
         <div class="badges">
-          <span>GitHub sync</span>
+          <span>GitHub account sync</span>
           <span>Localhost launch</span>
           <span>VS Code ready</span>
         </div>
@@ -30,9 +30,22 @@
       </div>
     </section>
 
+    <section class="github-account panel">
+      <div>
+        <span class="eyebrow">GitHub account</span>
+        <h2 id="githubTitle">GitHub koppelen</h2>
+        <p id="githubMessage">Login één keer en de launcher toont daarna automatisch al jouw repo’s.</p>
+      </div>
+      <div class="github-actions">
+        <button id="installGhButton" class="btn ghost hidden" onclick="installGitHubCli()">GitHub CLI installeren</button>
+        <button id="loginGhButton" class="btn secondary" onclick="loginGitHub()">Inloggen met GitHub</button>
+        <button id="importGhButton" class="btn primary hidden" onclick="importGitHubRepos()">Alle repo’s ophalen</button>
+      </div>
+    </section>
+
     <section class="controls panel">
       <div class="control-block">
-        <label for="repoUrl">Nieuwe GitHub-repo</label>
+        <label for="repoUrl">Losse GitHub-repo toevoegen</label>
         <div class="row">
           <input id="repoUrl" placeholder="https://github.com/tommyvercettiseh/palletoptimizer">
           <button class="btn primary" onclick="addRepo()">Toevoegen</button>
@@ -57,7 +70,7 @@
     <section>
       <div class="section-title">
         <div><span class="eyebrow">Workspace</span><h2>Projecten</h2></div>
-        <button class="btn ghost" onclick="refreshRepos()">Verversen</button>
+        <button class="btn ghost" onclick="refreshEverything()">Alles verversen</button>
       </div>
       <div id="repoGrid" class="repo-grid"></div>
     </section>
