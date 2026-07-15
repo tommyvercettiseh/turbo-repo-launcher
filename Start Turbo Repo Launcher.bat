@@ -2,15 +2,18 @@
 setlocal
 cd /d "%~dp0"
 
-title Turbo Repo Launcher
+title Turbo Repo Hub
 
-echo.
-echo ========================================
-echo   Turbo Repo Launcher
-echo ========================================
-echo.
-
+set "WINDOWS_APPS=%LOCALAPPDATA%\Microsoft\WindowsApps"
+set "PATH=%PATH%;%WINDOWS_APPS%"
+set "WINGET_EXE=%WINDOWS_APPS%\winget.exe"
 set "PYTHON_CMD="
+
+echo.
+echo ========================================
+echo   Turbo Repo Hub
+echo ========================================
+echo.
 
 where py >nul 2>nul
 if not errorlevel 1 set "PYTHON_CMD=py"
@@ -23,16 +26,24 @@ if not defined PYTHON_CMD (
 if not defined PYTHON_CMD (
   echo Python 3.10 of nieuwer is niet gevonden.
   echo.
-  echo Installeer Python met:
-  echo   winget install --id Python.Python.3.13 -e
-  echo.
-  echo Sluit daarna PowerShell en Visual Studio Code volledig af,
-  echo open ze opnieuw en start dit bestand nogmaals.
+  if exist "%WINGET_EXE%" (
+    echo Python installeren via WinGet...
+    "%WINGET_EXE%" install --id Python.Python.3.13 -e --source winget
+  ) else (
+    echo WinGet is niet gevonden op:
+    echo   %WINGET_EXE%
+    echo.
+    echo Installeer of herstel Microsoft App Installer.
+  )
   pause
   exit /b 1
 )
 
 echo Python gevonden via: %PYTHON_CMD%
+
+if exist "%WINGET_EXE%" (
+  for /f "delims=" %%V in ('"%WINGET_EXE%" --version 2^>nul') do echo WinGet gevonden: %%V
+)
 
 if not exist .venv (
   echo Virtuele omgeving maken...
@@ -48,7 +59,7 @@ python -m pip install --upgrade pip >nul
 python -m pip install -r requirements.txt
 if errorlevel 1 goto :error
 
-echo Launcher openen op http://127.0.0.1:8787
+echo Turbo Repo Hub openen op http://127.0.0.1:8787
 start "" http://127.0.0.1:8787
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8787
 exit /b 0
