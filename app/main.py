@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 
 from .config import APP_NAME
 from .models import RepoAddRequest, RepoRootUpdateRequest
-from .services import RepoService
+from .services_fixed import RepoService
 
 app = FastAPI(title=APP_NAME)
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,7 +19,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "app": APP_NAME, "version": "0.3.0"}
+    return {"ok": True, "app": APP_NAME, "version": "0.3.1"}
 
 
 @app.get("/", response_class=HTMLResponse)
