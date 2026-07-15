@@ -24,6 +24,7 @@
       <div class="setup-row">
         <div><strong id="githubTitle">GitHub koppelen</strong><span id="githubMessage">Controleer je GitHub-verbinding.</span></div>
         <div class="setup-actions">
+          <button id="ftpSettingsButton" class="button subtle" onclick="openFtpSettings()">🔐 Open FTP settings</button>
           <button id="installGhButton" class="button subtle hidden" onclick="installGitHubCli()">GitHub CLI installeren</button>
           <button id="loginGhButton" class="button subtle" onclick="loginGitHub()">Inloggen</button>
           <button id="importGhButton" class="button primary hidden" onclick="importGitHubRepos()">Repo’s ophalen</button>
@@ -46,6 +47,26 @@
   </main>
 
   <dialog id="modal"><div class="modal-head"><h3 id="modalTitle">Resultaat</h3><button onclick="closeModal()">×</button></div><pre id="modalContent"></pre></dialog>
+
+  <dialog id="ftpModal" class="settings-dialog">
+    <div class="modal-head"><div><h3>FTP settings</h3><p>Eenmalig instellen voor al je statische websites.</p></div><button onclick="closeFtpSettings()">×</button></div>
+    <div class="settings-grid">
+      <label>Verbinding<select id="ftpProtocol"><option value="ftps">FTPS (aanbevolen)</option><option value="ftp">FTP</option><option value="sftp">SFTP</option></select></label>
+      <label>Poort<input id="ftpPort" type="number" min="1" max="65535" value="21"></label>
+      <label class="wide">FTP-server<input id="ftpHost" placeholder="ftp.jouwdomein.nl"></label>
+      <label class="wide">Gebruikersnaam<input id="ftpUsername" autocomplete="username"></label>
+      <label class="wide">Wachtwoord<input id="ftpPassword" type="password" autocomplete="current-password" placeholder="Leeg laten om bestaand wachtwoord te behouden"><small id="ftpPasswordStatus"></small></label>
+      <label class="wide">Basismap<input id="ftpBaseDirectory" value="/public_html/"><small>Nieuwe projecten krijgen standaard /public_html/project-slug/</small></label>
+    </div>
+    <div class="dialog-actions"><button class="button subtle" onclick="testFtpConnection()">Test verbinding</button><button class="button primary" onclick="saveFtpSettings()">Opslaan</button></div>
+  </dialog>
+
+  <dialog id="projectFtpModal" class="settings-dialog small-dialog">
+    <div class="modal-head"><div><h3>Publicatiemap</h3><p id="projectFtpName"></p></div><button onclick="closeProjectFtpSettings()">×</button></div>
+    <label>Map op Hostnet<input id="projectFtpDirectory" placeholder="/public_html/project/"></label>
+    <div class="dialog-actions"><button class="button primary" onclick="saveProjectFtpDirectory()">Opslaan</button></div>
+  </dialog>
+
   <div id="toast" class="toast hidden"></div>
   <script>window.__INITIAL_REPOS__ = {{ repos | tojson }};</script>
   <script src="/static/app.js"></script>
