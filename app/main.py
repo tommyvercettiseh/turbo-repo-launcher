@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -14,13 +15,53 @@ from .services_fixed import RepoService
 
 app = FastAPI(title=APP_NAME)
 BASE_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = BASE_DIR.parent
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "app": APP_NAME, "version": "0.6.0"}
+    return {"ok": True, "app": APP_NAME, "version": "0.7.0"}
+
+
+@app.get("/api/hub/status")
+def hub_status() -> dict:
+    checked_at = datetime.now(timezone.utc).isoformat()
+    result = {
+        "checked_at": checked_at,
+        "commit": "",
+        "message": "",
+        "branch": "",
+        "ahead": 0,
+        "behind": 0,
+        "dirty": False,
+        "status": "unknown",
+        "status_label": "Niet gecontroleerd",
+    }
+    try:
+        if not (PROJECT_DIR / ".git").exists():
+            result.update({"status": "not-git", "status_label": "Geen lokale Git-repo"})
+            return result
+        result["commit"] = RepoService.run_command(["git", "rev-parse", "--short", "HEAD"], PROJECT_DIR)
+        result["message"] = RepoService.run_command(["git", "log", "-1", "--pretty=%s"], PROJECT_DIR)
+        result["branch"] = RepoService.run_command(["git", "branch", "--show-current"], PROJECT_DIR)
+        result["dirty"] = bool(RepoService.run_command(["git", "status", "--short"], PROJECT_DIR))
+        RepoService.run_command(["git", "fetch", "--quiet"], PROJECT_DIR, timeout=30)
+        counts = RepoService.run_command(["git", "rev-list", "--left-right", "--count", "HEAD...@{u}"], PROJECT_DIR)
+        ahead, behind = [int(value) for value in counts.split()]
+        result.update({"ahead": ahead, "behind": behind})
+        if result["dirty"]:
+            result.update({"status": "dirty", "status_label": "Lokale wijzigingen"})
+        elif behind > 0:
+            result.update({"status": "outdated", "status_label": f"Update beschikbaar ({behind})"})
+        elif ahead > 0:
+            result.update({"status": "ahead", "status_label": f"Lokaal voor op GitHub ({ahead})"})
+        else:
+            result.update({"status": "current", "status_label": "Up-to-date"})
+    except Exception as exc:
+        result.update({"status": "error", "status_label": "Controle mislukt", "error": str(exc)})
+    return result
 
 
 @app.get("/", response_class=HTMLResponse)
