@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "name": "Turbo Repo Launcher",
+  "name": "Turbo Repo Hub",
   "slug": "turbo-repo-launcher",
-  "version": "0.3.0",
-  "description": "Persoonlijke softwarefabriek voor GitHub-projecten: ontdekken, lokaal testen, beheren en veilig publicatieklaar maken.",
+  "version": "0.4.0",
+  "description": "Eenvoudige centrale hub voor het herkennen, bijwerken en publiceren van lokale en gekoppelde GitHub-projecten.",
   "preview": "docs/previews/latest.svg",
   "tags": ["Python", "FastAPI", "GitHub", "Automation"],
   "runtime": {
