@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" fill="none">
+  <rect width="1440" height="900" fill="#081223"/>
+  <circle cx="180" cy="130" r="190" fill="#4F7CFF" fill-opacity="0.34"/>
+  <circle cx="1260" cy="150" r="170" fill="#7B61FF" fill-opacity="0.28"/>
+  <rect x="65" y="60" width="1310" height="170" rx="30" fill="#132448" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <text x="108" y="118" fill="#8EB4FF" font-family="Segoe UI,Arial" font-size="18" letter-spacing="4">CHIEF DEV CONTROL CENTER</text>
+  <text x="108" y="182" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="54" font-weight="700">Turbo Repo Launcher</text>
+  <text x="108" y="218" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="21">Synchroniseer, test en launch al je GitHub-projecten vanuit één lokaal dashboard.</text>
+  <rect x="65" y="255" width="1310" height="105" rx="25" fill="#132448" stroke="#FFFFFF" stroke-opacity="0.08"/>
+  <rect x="95" y="288" width="625" height="40" rx="13" fill="#1B305F"/>
+  <text x="118" y="314" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">https://github.com/tommyvercettiseh/palletoptimizer</text>
+  <rect x="740" y="281" width="155" height="54" rx="16" fill="#5E89FF"/>
+  <text x="782" y="315" fill="white" font-family="Segoe UI,Arial" font-size="18" font-weight="700">Toevoegen</text>
+  <rect x="920" y="288" width="315" height="40" rx="13" fill="#1B305F"/>
+  <text x="942" y="314" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">C:\Users\Hes\TurboRepos</text>
+  <rect x="1250" y="281" width="95" height="54" rx="16" fill="#223A72"/>
+  <text x="1270" y="315" fill="white" font-family="Segoe UI,Arial" font-size="17" font-weight="700">Opslaan</text>
+  <g fill="#132448" stroke="#FFFFFF" stroke-opacity="0.08">
+    <rect x="65" y="390" width="310" height="110" rx="24"/><rect x="395" y="390" width="310" height="110" rx="24"/><rect x="725" y="390" width="310" height="110" rx="24"/><rect x="1055" y="390" width="320" height="110" rx="24"/>
+    <rect x="65" y="535" width="410" height="300" rx="26"/><rect x="515" y="535" width="410" height="300" rx="26"/><rect x="965" y="535" width="410" height="300" rx="26"/>
+  </g>
+  <text x="92" y="428" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">Projecten</text><text x="92" y="477" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="42" font-weight="700">4</text>
+  <text x="422" y="428" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">Draaiend</text><text x="422" y="477" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="42" font-weight="700">2</text>
+  <text x="752" y="428" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">Lokale changes</text><text x="752" y="477" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="42" font-weight="700">1</text>
+  <text x="1082" y="428" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">Repo root</text><text x="1082" y="470" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="21" font-weight="700">C:\Users\Hes\TurboRepos</text>
+  <text x="95" y="580" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="28" font-weight="700">Pallet Optimizer</text>
+  <text x="95" y="613" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">Tetris-indelingen voor pallets.</text>
+  <rect x="95" y="640" width="350" height="105" rx="18" fill="#1B305F"/>
+  <text x="222" y="700" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="18">Projectpreview</text>
+  <rect x="95" y="765" width="95" height="43" rx="13" fill="#5E89FF"/><text x="126" y="792" fill="white" font-family="Segoe UI,Arial" font-size="16" font-weight="700">Sync</text>
+  <rect x="205" y="765" width="95" height="43" rx="13" fill="#223A72"/><text x="235" y="792" fill="white" font-family="Segoe UI,Arial" font-size="16" font-weight="700">Start</text>
+  <text x="545" y="580" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="28" font-weight="700">Season Monitor</text>
+  <text x="545" y="613" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">Forecast- en seizoenssturing.</text>
+  <rect x="545" y="640" width="350" height="105" rx="18" fill="#1B305F"/>
+  <text x="995" y="580" fill="#EFF4FF" font-family="Segoe UI,Arial" font-size="28" font-weight="700">Order Parser</text>
+  <text x="995" y="613" fill="#9AB0D6" font-family="Segoe UI,Arial" font-size="16">PDF-orders automatisch verwerken.</text>
+  <rect x="995" y="640" width="350" height="105" rx="18" fill="#1B305F"/>
+</svg>
