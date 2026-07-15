@@ -1,0 +1,10 @@
+{
+  "name": "Turbo Repo Launcher",
+  "slug": "turbo-repo-launcher",
+  "version": "0.1.0",
+  "description": "Lokale launcher voor GitHub-projecten met moderne dashboard-UI en eenklik start- en sync-acties.",
+  "preview": "docs/previews/latest.svg",
+  "start_command": "Start Turbo Repo Launcher.bat",
+  "default_port": 8787,
+  "health_url": "http://127.0.0.1:8787/health"
+}
