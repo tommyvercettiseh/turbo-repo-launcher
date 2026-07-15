@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0
+
+• Statuslabels gewijzigd naar rustige afgeronde rechthoeken voor `Update`, `Updated` en `Publiceer`
+• Nieuwe knop `Open repo` opent de lokale projectmap
+• Nieuwe knop `Open GitHub` opent direct de juiste repositorypagina
+• Nieuwe knop `Start repo` voert het startcommando uit `turbo-project.json` uit
+• Draaiende projecten tonen automatisch `Stop repo`
+• Localhost opent automatisch nadat een project is gestart wanneer een health-URL beschikbaar is
+• Kaarten behouden een vaste compacte breedte, ook wanneer maar één repository zichtbaar is
+• Actieknoppen en metadata zijn opgesplitst voor een rustiger en duidelijker kaartontwerp
+
 ## 0.4.0
 
 • Nieuw vereenvoudigd kaartdashboard voor alle lokale en gekoppelde repositories
