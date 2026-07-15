@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -57,7 +58,7 @@ class RepoService:
             **entry,
             "name": manifest.get("name") or entry.get("name") or slug,
             "version": manifest.get("version") or "-",
-            "description": manifest.get("description") or "",
+            "description": manifest.get("description") or entry.get("description") or "",
             "start_command": manifest.get("start_command") or "",
             "preview_url": preview_url,
             "health_url": manifest.get("health_url") or "",
@@ -69,15 +70,25 @@ class RepoService:
         }
 
     @staticmethod
-    def add_repo(repo_url: str) -> dict[str, Any]:
+    def add_repo(repo_url: str, metadata: dict[str, Any] | None = None) -> dict[str, Any]:
         slug = repo_slug_from_url(repo_url)
         if not slug:
             raise ValueError("Ongeldige GitHub URL")
         settings = load_settings()
         existing = next((r for r in settings["repos"] if r["slug"] == slug), None)
         if existing:
+            if metadata:
+                existing.update({key: value for key, value in metadata.items() if value is not None})
+                save_settings(settings)
             return RepoService.enrich_repo(existing, RepoService.get_repo_root())
-        entry = {"slug": slug, "repo_url": repo_url, "name": slug.replace("-", " ").title()}
+        entry = {
+            "slug": slug,
+            "repo_url": repo_url,
+            "name": (metadata or {}).get("name") or slug.replace("-", " ").title(),
+            "description": (metadata or {}).get("description") or "",
+            "is_private": bool((metadata or {}).get("is_private", False)),
+            "updated_at": (metadata or {}).get("updated_at") or "",
+        }
         settings["repos"].append(entry)
         save_settings(settings)
         return RepoService.enrich_repo(entry, RepoService.get_repo_root())
@@ -90,11 +101,109 @@ class RepoService:
         raise FileNotFoundError(f"Repo {slug} niet gevonden")
 
     @staticmethod
-    def run_command(command: list[str], cwd: Path) -> str:
-        process = subprocess.run(command, cwd=str(cwd), capture_output=True, text=True)
+    def run_command(command: list[str], cwd: Path | None = None) -> str:
+        process = subprocess.run(
+            command,
+            cwd=str(cwd) if cwd else None,
+            capture_output=True,
+            text=True,
+            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform.startswith("win") else 0,
+        )
         if process.returncode != 0:
             raise RuntimeError(process.stderr.strip() or process.stdout.strip() or "Commando mislukt")
         return process.stdout.strip()
+
+    @staticmethod
+    def github_cli_available() -> bool:
+        return shutil.which("gh") is not None
+
+    @staticmethod
+    def github_status() -> dict[str, Any]:
+        if not RepoService.github_cli_available():
+            return {
+                "cli_installed": False,
+                "authenticated": False,
+                "username": "",
+                "message": "GitHub CLI is nog niet geïnstalleerd.",
+            }
+        try:
+            RepoService.run_command(["gh", "auth", "status", "--hostname", "github.com"])
+            username = RepoService.run_command(["gh", "api", "user", "--jq", ".login"])
+            return {
+                "cli_installed": True,
+                "authenticated": True,
+                "username": username,
+                "message": f"Ingelogd als {username}",
+            }
+        except Exception as exc:
+            return {
+                "cli_installed": True,
+                "authenticated": False,
+                "username": "",
+                "message": str(exc),
+            }
+
+    @staticmethod
+    def install_github_cli() -> None:
+        if RepoService.github_cli_available():
+            return
+        if not sys.platform.startswith("win"):
+            raise RuntimeError("Installeer GitHub CLI handmatig op dit besturingssysteem.")
+        subprocess.Popen(
+            'start "GitHub CLI installatie" cmd /k "winget install --id GitHub.cli -e --source winget"',
+            shell=True,
+        )
+
+    @staticmethod
+    def start_github_login() -> None:
+        if not RepoService.github_cli_available():
+            raise RuntimeError("Installeer eerst GitHub CLI.")
+        if sys.platform.startswith("win"):
+            subprocess.Popen(
+                'start "GitHub Login" cmd /k "gh auth login --web --hostname github.com --git-protocol https"',
+                shell=True,
+            )
+        else:
+            subprocess.Popen(["gh", "auth", "login", "--web", "--hostname", "github.com", "--git-protocol", "https"])
+
+    @staticmethod
+    def import_github_repos() -> dict[str, Any]:
+        status = RepoService.github_status()
+        if not status["authenticated"]:
+            raise RuntimeError("Log eerst in bij GitHub.")
+
+        raw = RepoService.run_command([
+            "gh",
+            "repo",
+            "list",
+            status["username"],
+            "--limit",
+            "1000",
+            "--json",
+            "name,url,description,isPrivate,updatedAt",
+        ])
+        discovered = json.loads(raw or "[]")
+        imported = 0
+        for item in discovered:
+            before = len(load_settings().get("repos", []))
+            RepoService.add_repo(
+                item["url"],
+                {
+                    "name": item.get("name"),
+                    "description": item.get("description") or "",
+                    "is_private": item.get("isPrivate", False),
+                    "updated_at": item.get("updatedAt") or "",
+                },
+            )
+            after = len(load_settings().get("repos", []))
+            if after > before:
+                imported += 1
+        return {
+            "username": status["username"],
+            "found": len(discovered),
+            "imported": imported,
+            "repos": RepoService.list_repos(),
+        }
 
     @staticmethod
     def git_status(local_path: Path) -> str:
@@ -161,4 +270,4 @@ class RepoService:
 
     @staticmethod
     def open_vscode(slug: str) -> None:
-        subprocess.Popen(["code", RepoService.get_repo(slug)["local_path"]])
+        subprocess.Popen(["code", RepoService.get_repo(slug)["local_path"])
