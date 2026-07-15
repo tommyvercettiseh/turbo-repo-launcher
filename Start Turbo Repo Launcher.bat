@@ -10,25 +10,42 @@ echo   Turbo Repo Launcher
 echo ========================================
 echo.
 
+set "PYTHON_CMD="
+
 where py >nul 2>nul
-if errorlevel 1 (
-  echo Python Launcher is niet gevonden.
-  echo Installeer Python 3.10 of nieuwer en vink Add Python to PATH aan.
+if not errorlevel 1 set "PYTHON_CMD=py"
+
+if not defined PYTHON_CMD (
+  where python >nul 2>nul
+  if not errorlevel 1 set "PYTHON_CMD=python"
+)
+
+if not defined PYTHON_CMD (
+  echo Python 3.10 of nieuwer is niet gevonden.
+  echo.
+  echo Installeer Python met:
+  echo   winget install --id Python.Python.3.13 -e
+  echo.
+  echo Sluit daarna PowerShell en Visual Studio Code volledig af,
+  echo open ze opnieuw en start dit bestand nogmaals.
   pause
   exit /b 1
 )
 
+echo Python gevonden via: %PYTHON_CMD%
+
 if not exist .venv (
   echo Virtuele omgeving maken...
-  py -m venv .venv
+  %PYTHON_CMD% -m venv .venv
   if errorlevel 1 goto :error
 )
 
-call .venv\Scripts\activate
+call .venv\Scripts\activate.bat
+if errorlevel 1 goto :error
 
 echo Dependencies controleren...
 python -m pip install --upgrade pip >nul
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 if errorlevel 1 goto :error
 
 echo Launcher openen op http://127.0.0.1:8787
