@@ -12,3 +12,16 @@ class RepoAddRequest(BaseModel):
 
 class RepoRootUpdateRequest(BaseModel):
     repo_root: str
+
+
+class FtpSettingsRequest(BaseModel):
+    host: str
+    username: str
+    password: str = ""
+    port: int = 21
+    protocol: str = "ftps"
+    base_directory: str = "/public_html/"
+
+
+class ProjectFtpDirectoryRequest(BaseModel):
+    directory: str
