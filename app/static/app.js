@@ -40,7 +40,7 @@ function updateStats() {
 function renderRepos() {
   const grid = document.getElementById('repoGrid');
   if (!repos.length) {
-    grid.innerHTML = '<article class="panel repo-card"><div class="preview-empty">Nog geen projecten toegevoegd. Plak hierboven je eerste GitHub URL 🚀</div></article>';
+    grid.innerHTML = '<article class="panel repo-card"><div class="preview-empty">Nog geen projecten gevonden. Log hierboven in met GitHub 🚀</div></article>';
     updateStats();
     return;
   }
@@ -54,6 +54,7 @@ function renderRepos() {
         </div>
         <div>
           <span class="${statusClass(repo.git_status)}">${escapeHtml(repo.git_status)}</span>
+          ${repo.is_private ? '<span class="chip private">privé</span>' : ''}
           ${repo.is_running ? '<span class="chip running">draait</span>' : ''}
         </div>
       </div>
@@ -80,6 +81,68 @@ function renderRepos() {
   updateStats();
 }
 
+async function loadGitHubAccount(autoImport = true) {
+  try {
+    const status = await api('/api/github/status');
+    const title = document.getElementById('githubTitle');
+    const message = document.getElementById('githubMessage');
+    const installButton = document.getElementById('installGhButton');
+    const loginButton = document.getElementById('loginGhButton');
+    const importButton = document.getElementById('importGhButton');
+
+    installButton.classList.toggle('hidden', status.cli_installed);
+    loginButton.classList.toggle('hidden', status.authenticated || !status.cli_installed);
+    importButton.classList.toggle('hidden', !status.authenticated);
+
+    if (!status.cli_installed) {
+      title.textContent = 'GitHub CLI installeren';
+      message.textContent = 'De launcher gebruikt GitHub CLI voor veilig inloggen en privé-repo’s.';
+      return;
+    }
+    if (!status.authenticated) {
+      title.textContent = 'GitHub koppelen';
+      message.textContent = 'Login één keer via je browser. Windows bewaart daarna je GitHub-sessie.';
+      return;
+    }
+
+    title.textContent = `Ingelogd als ${status.username}`;
+    message.textContent = 'Nieuwe repo’s worden automatisch opgehaald wanneer je de launcher opent.';
+    if (autoImport) await importGitHubRepos(true);
+  } catch (error) {
+    showToast(error.message, true);
+  }
+}
+
+async function installGitHubCli() {
+  try {
+    await api('/api/github/install', { method: 'POST' });
+    showToast('Installatievenster geopend. Start de launcher daarna opnieuw.');
+  } catch (error) {
+    showToast(error.message, true);
+  }
+}
+
+async function loginGitHub() {
+  try {
+    await api('/api/github/login', { method: 'POST' });
+    showToast('GitHub-login geopend. Rond de login af en klik daarna op Alles verversen.');
+  } catch (error) {
+    showToast(error.message, true);
+  }
+}
+
+async function importGitHubRepos(silent = false) {
+  try {
+    if (!silent) showToast('GitHub-repo’s ophalen...');
+    const data = await api('/api/github/import', { method: 'POST' });
+    repos = data.repos;
+    renderRepos();
+    if (!silent) showToast(`${data.found} repo’s gevonden, ${data.imported} nieuw toegevoegd`);
+  } catch (error) {
+    if (!silent) showToast(error.message, true);
+  }
+}
+
 async function refreshRepos() {
   try {
     const data = await api('/api/repos');
@@ -90,6 +153,12 @@ async function refreshRepos() {
   } catch (error) {
     showToast(error.message, true);
   }
+}
+
+async function refreshEverything() {
+  await loadGitHubAccount(true);
+  await refreshRepos();
+  showToast('Alles is ververst');
 }
 
 async function addRepo() {
@@ -140,3 +209,4 @@ function openApp(healthUrl) {
 }
 
 renderRepos();
+loadGitHubAccount(true);
