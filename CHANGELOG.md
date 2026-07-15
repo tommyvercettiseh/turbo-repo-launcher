@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.0
+
+• Bovenin de bestaande layout staat nu compact de actuele status van Turbo Repo Hub zelf
+• Toont de lokale commit, actieve branch en het tijdstip van de laatste GitHub-controle
+• Maakt onderscheid tussen `Up-to-date`, `Update beschikbaar`, `Lokale wijzigingen`, `Lokaal voor op GitHub` en `Controle mislukt`
+• De bestaande dashboardlayout en repositorykaarten zijn verder ongewijzigd gebleven
+
+## 0.6.0
+
+• Centrale knop `Open FTP settings` toegevoegd aan het bestaande instellingenpaneel
+• FTP- en FTPS-instellingen kunnen lokaal worden opgeslagen en getest
+• FTP-wachtwoorden worden op Windows versleuteld opgeslagen
+• Per repository kan een aparte Hostnet-publicatiemap worden ingesteld
+
 ## 0.5.0
 
 • Statuslabels gewijzigd naar rustige afgeronde rechthoeken voor `Update`, `Updated` en `Publiceer`
