@@ -3,10 +3,7 @@ from __future__ import annotations
 import base64
 import ctypes
 import ftplib
-import json
-import ssl
 from ctypes import wintypes
-from pathlib import Path
 from typing import Any
 
 from .config import load_settings, save_settings
@@ -22,13 +19,13 @@ def _protect(value: str) -> str:
     if not hasattr(ctypes, "windll"):
         return base64.b64encode(value.encode("utf-8")).decode("ascii")
     raw = value.encode("utf-8")
-    source = DATA_BLOB(len(raw), ctypes.cast(ctypes.create_string_buffer(raw), ctypes.POINTER(ctypes.c_byte)))
+    source_buffer = ctypes.create_string_buffer(raw)
+    source = DATA_BLOB(len(raw), ctypes.cast(source_buffer, ctypes.POINTER(ctypes.c_byte)))
     target = DATA_BLOB()
     if not ctypes.windll.crypt32.CryptProtectData(ctypes.byref(source), "Turbo Repo Hub FTP", None, None, None, 0, ctypes.byref(target)):
         raise RuntimeError("FTP-wachtwoord kon niet veilig worden opgeslagen.")
     try:
-        data = ctypes.string_at(target.pbData, target.cbData)
-        return base64.b64encode(data).decode("ascii")
+        return base64.b64encode(ctypes.string_at(target.pbData, target.cbData)).decode("ascii")
     finally:
         ctypes.windll.kernel32.LocalFree(target.pbData)
 
@@ -39,7 +36,8 @@ def _unprotect(value: str) -> str:
     encrypted = base64.b64decode(value)
     if not hasattr(ctypes, "windll"):
         return encrypted.decode("utf-8")
-    source = DATA_BLOB(len(encrypted), ctypes.cast(ctypes.create_string_buffer(encrypted), ctypes.POINTER(ctypes.c_byte)))
+    source_buffer = ctypes.create_string_buffer(encrypted)
+    source = DATA_BLOB(len(encrypted), ctypes.cast(source_buffer, ctypes.POINTER(ctypes.c_byte)))
     target = DATA_BLOB()
     if not ctypes.windll.crypt32.CryptUnprotectData(ctypes.byref(source), None, None, None, None, 0, ctypes.byref(target)):
         raise RuntimeError("FTP-wachtwoord kon niet worden gelezen.")
@@ -86,7 +84,9 @@ class FtpService:
     @staticmethod
     def normalize_directory(directory: str) -> str:
         value = "/" + directory.strip().replace("\\", "/").strip("/") + "/"
-        return value.replace("//", "/")
+        while "//" in value:
+            value = value.replace("//", "/")
+        return value
 
     @staticmethod
     def set_project_directory(slug: str, directory: str) -> dict[str, str]:
@@ -112,7 +112,7 @@ class FtpService:
             raise RuntimeError("Vul eerst FTP-server, gebruikersnaam en wachtwoord in.")
         protocol = cfg["protocol"].lower()
         if protocol == "sftp":
-            raise RuntimeError("SFTP-test vereist een aparte SSH-module. Kies FTP of FTPS voor Hostnet.")
+            raise RuntimeError("SFTP-test wordt nog niet ondersteund. Kies FTP of FTPS voor Hostnet.")
         ftp = ftplib.FTP_TLS() if protocol == "ftps" else ftplib.FTP()
         try:
             ftp.connect(cfg["host"], cfg["port"], timeout=12)
@@ -121,7 +121,7 @@ class FtpService:
                 ftp.prot_p()
             ftp.cwd(cfg["base_directory"])
             return {"ok": True, "message": f"Verbinding gelukt met {cfg['host']}{cfg['base_directory']}"}
-        except (OSError, ftplib.all_errors, ssl.SSLError) as exc:
+        except Exception as exc:
             raise RuntimeError(f"FTP-verbinding mislukt: {exc}") from exc
         finally:
             try:
