@@ -7,45 +7,44 @@
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <div class="orb orb-a"></div><div class="orb orb-b"></div><div class="grid-bg"></div>
   <main class="shell">
-    <section class="hero panel">
-      <div>
-        <span class="eyebrow">Personal software factory</span>
-        <h1>{{ app_name }}</h1>
-        <p>Spreek ideeën in, laat code naar GitHub schrijven, test lokaal en publiceer pas wanneer alle checks groen zijn.</p>
-        <div class="badges"><span>GitHub sync</span><span>Preview first</span><span>Safe publish</span><span>Home Assistant ready</span></div>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🚀</div>
+        <div><h1>Turbo Repo Hub</h1><p>Jouw verbonden repositories</p></div>
       </div>
-      <div class="hero-visual"><div class="float-card one"></div><div class="float-card two"></div><div class="float-card three"></div></div>
-    </section>
+      <div class="top-actions">
+        <input id="repoSearch" type="search" placeholder="Zoek repositories…" aria-label="Zoek repositories">
+        <button class="icon-button" onclick="refreshEverything()" title="Verversen" aria-label="Verversen">↻</button>
+        <button class="icon-button" onclick="toggleSetup()" title="Instellingen" aria-label="Instellingen">☰</button>
+      </div>
+    </header>
 
-    <section class="github-account panel">
-      <div><span class="eyebrow">GitHub account</span><h2 id="githubTitle">GitHub koppelen</h2><p id="githubMessage">Login één keer; daarna verschijnen jouw openbare en privé-repo’s automatisch.</p></div>
-      <div class="github-actions">
-        <button id="installGhButton" class="btn ghost hidden" onclick="installGitHubCli()">GitHub CLI installeren</button>
-        <button id="loginGhButton" class="btn secondary" onclick="loginGitHub()">Inloggen met GitHub</button>
-        <button id="importGhButton" class="btn primary hidden" onclick="importGitHubRepos()">Alle repo’s ophalen</button>
+    <section id="setupPanel" class="setup-panel hidden">
+      <div class="setup-row">
+        <div><strong id="githubTitle">GitHub koppelen</strong><span id="githubMessage">Controleer je GitHub-verbinding.</span></div>
+        <div class="setup-actions">
+          <button id="installGhButton" class="button subtle hidden" onclick="installGitHubCli()">GitHub CLI installeren</button>
+          <button id="loginGhButton" class="button subtle" onclick="loginGitHub()">Inloggen</button>
+          <button id="importGhButton" class="button primary hidden" onclick="importGitHubRepos()">Repo’s ophalen</button>
+        </div>
+      </div>
+      <div class="setup-grid">
+        <label>Losse repo toevoegen<div><input id="repoUrl" placeholder="https://github.com/gebruiker/project"><button class="button primary" onclick="addRepo()">Toevoegen</button></div></label>
+        <label>Lokale projectmap<div><input id="repoRoot" value="{{ repo_root }}"><button class="button subtle" onclick="saveRepoRoot()">Opslaan</button></div></label>
       </div>
     </section>
 
-    <section class="controls panel">
-      <div class="control-block"><label for="repoUrl">Losse repo toevoegen</label><div class="row"><input id="repoUrl" placeholder="https://github.com/tommyvercettiseh/nieuwe-app"><button class="btn primary" onclick="addRepo()">Toevoegen</button></div></div>
-      <div class="control-block"><label for="repoRoot">Lokale projectmap</label><div class="row"><input id="repoRoot" value="{{ repo_root }}"><button class="btn secondary" onclick="saveRepoRoot()">Opslaan</button></div></div>
-    </section>
+    <nav class="filters" aria-label="Repositoryfilters">
+      <button class="filter active" data-filter="all">Alles <span id="countAll">0</span></button>
+      <button class="filter" data-filter="update">Updates <span id="countUpdates">0</span></button>
+      <button class="filter" data-filter="updated">Updated <span id="countUpdated">0</span></button>
+      <button class="filter" data-filter="publish">Publiceer <span id="countPublish">0</span></button>
+    </nav>
 
-    <section class="stats">
-      <article class="panel stat"><span>Projecten</span><strong id="statProjects">{{ repos|length }}</strong></article>
-      <article class="panel stat"><span>Nieuwe repo’s</span><strong id="statNew">0</strong></article>
-      <article class="panel stat"><span>Updates</span><strong id="statUpdates">0</strong></article>
-      <article class="panel stat"><span>Live</span><strong id="statLive">0</strong></article>
-    </section>
-
-    <section>
-      <div class="section-title"><div><span class="eyebrow">Workspace</span><h2>Jouw projecten</h2></div><button class="btn ghost" onclick="refreshEverything()">Alles verversen</button></div>
-      <div class="filters"><button class="filter active" data-filter="all">Alles</button><button class="filter" data-filter="new">Nieuw</button><button class="filter" data-filter="update">Updates</button><button class="filter" data-filter="running">Draait</button><button class="filter" data-filter="live">Live</button></div>
-      <div id="repoGrid" class="repo-grid"></div>
-    </section>
+    <section id="repoGrid" class="repo-grid" aria-live="polite"></section>
   </main>
+
   <dialog id="modal"><div class="modal-head"><h3 id="modalTitle">Resultaat</h3><button onclick="closeModal()">×</button></div><pre id="modalContent"></pre></dialog>
   <div id="toast" class="toast hidden"></div>
   <script>window.__INITIAL_REPOS__ = {{ repos | tojson }};</script>
