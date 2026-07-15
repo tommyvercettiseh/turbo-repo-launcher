@@ -19,20 +19,16 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "app": APP_NAME}
+    return {"ok": True, "app": APP_NAME, "version": "0.3.0"}
 
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
-    return templates.TemplateResponse(
-        request,
-        "index.html",
-        {
-            "app_name": APP_NAME,
-            "repos": RepoService.list_repos(),
-            "repo_root": str(RepoService.get_repo_root()),
-        },
-    )
+    return templates.TemplateResponse(request, "index.html", {
+        "app_name": APP_NAME,
+        "repos": RepoService.list_repos(),
+        "repo_root": str(RepoService.get_repo_root()),
+    })
 
 
 @app.get("/api/repos")
@@ -92,6 +88,22 @@ def update_repo_root(payload: RepoRootUpdateRequest):
 def sync_repo(slug: str):
     try:
         return {"repo": RepoService.sync_repo(slug)}
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/api/repos/{slug}/test")
+def test_repo(slug: str):
+    try:
+        return RepoService.run_tests(slug)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/repos/{slug}/publish-plan")
+def publish_plan(slug: str):
+    try:
+        return RepoService.deployment_plan(slug)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
