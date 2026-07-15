@@ -19,7 +19,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "app": APP_NAME, "version": "0.4.0"}
+    return {"ok": True, "app": APP_NAME, "version": "0.5.0"}
 
 
 @app.get("/", response_class=HTMLResponse)
