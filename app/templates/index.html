@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_name }}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="grid-bg"></div>
+
+  <main class="shell">
+    <section class="hero panel">
+      <div>
+        <span class="eyebrow">Chief Dev Control Center</span>
+        <h1>{{ app_name }}</h1>
+        <p>Synchroniseer, test en launch al je GitHub-projecten vanuit één moderne lokale hub.</p>
+        <div class="badges">
+          <span>GitHub sync</span>
+          <span>Localhost launch</span>
+          <span>VS Code ready</span>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="float-card one"></div>
+        <div class="float-card two"></div>
+        <div class="float-card three"></div>
+      </div>
+    </section>
+
+    <section class="controls panel">
+      <div class="control-block">
+        <label for="repoUrl">Nieuwe GitHub-repo</label>
+        <div class="row">
+          <input id="repoUrl" placeholder="https://github.com/tommyvercettiseh/palletoptimizer">
+          <button class="btn primary" onclick="addRepo()">Toevoegen</button>
+        </div>
+      </div>
+      <div class="control-block">
+        <label for="repoRoot">Lokale projectmap</label>
+        <div class="row">
+          <input id="repoRoot" value="{{ repo_root }}">
+          <button class="btn secondary" onclick="saveRepoRoot()">Opslaan</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <article class="panel stat"><span>Projecten</span><strong id="statProjects">{{ repos|length }}</strong></article>
+      <article class="panel stat"><span>Draaiend</span><strong id="statRunning">0</strong></article>
+      <article class="panel stat"><span>Lokale changes</span><strong id="statChanges">0</strong></article>
+      <article class="panel stat root"><span>Repo root</span><strong id="statRoot">{{ repo_root }}</strong></article>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <div><span class="eyebrow">Workspace</span><h2>Projecten</h2></div>
+        <button class="btn ghost" onclick="refreshRepos()">Verversen</button>
+      </div>
+      <div id="repoGrid" class="repo-grid"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script>window.__INITIAL_REPOS__ = {{ repos | tojson }};</script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
