@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ app_name }}</title>
   <link rel="stylesheet" href="/static/styles.css">
-  <link rel="stylesheet" href="/static/ftp-settings.css">
 </head>
 <body>
   <main class="shell">
@@ -15,6 +14,10 @@
         <div><h1>Turbo Repo Hub</h1><p>Jouw verbonden repositories</p></div>
       </div>
       <div class="top-actions">
+        <div id="hubUpdateStatus" class="hub-update-status checking" title="Status van deze Turbo Repo Hub">
+          <span id="hubUpdateDot">●</span>
+          <span><strong id="hubUpdateLabel">Controleren…</strong><small id="hubUpdateMeta">GitHub-status ophalen</small></span>
+        </div>
         <input id="repoSearch" type="search" placeholder="Zoek repositories…" aria-label="Zoek repositories">
         <button class="icon-button" onclick="refreshEverything()" title="Verversen" aria-label="Verversen">↻</button>
         <button class="icon-button" onclick="toggleSetup()" title="Instellingen" aria-label="Instellingen">☰</button>
