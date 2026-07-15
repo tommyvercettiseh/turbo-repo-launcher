@@ -8,7 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .config import APP_NAME
-from .models import RepoAddRequest, RepoRootUpdateRequest
+from .ftp_service import FtpService
+from .models import FtpSettingsRequest, ProjectFtpDirectoryRequest, RepoAddRequest, RepoRootUpdateRequest
 from .services_fixed import RepoService
 
 app = FastAPI(title=APP_NAME)
@@ -19,7 +20,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "app": APP_NAME, "version": "0.5.0"}
+    return {"ok": True, "app": APP_NAME, "version": "0.6.0"}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -84,6 +85,40 @@ def update_repo_root(payload: RepoRootUpdateRequest):
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@app.get("/api/settings/ftp")
+def get_ftp_settings():
+    return FtpService.get_settings()
+
+
+@app.post("/api/settings/ftp")
+def save_ftp_settings(payload: FtpSettingsRequest):
+    try:
+        return FtpService.save_settings(payload.model_dump())
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/api/settings/ftp/test")
+def test_ftp_settings():
+    try:
+        return FtpService.test_connection()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/repos/{slug}/ftp-directory")
+def get_project_ftp_directory(slug: str):
+    return {"slug": slug, "directory": FtpService.get_project_directory(slug)}
+
+
+@app.post("/api/repos/{slug}/ftp-directory")
+def save_project_ftp_directory(slug: str, payload: ProjectFtpDirectoryRequest):
+    try:
+        return FtpService.set_project_directory(slug, payload.directory)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @app.post("/api/repos/{slug}/sync")
 def sync_repo(slug: str):
     try:
@@ -103,7 +138,10 @@ def test_repo(slug: str):
 @app.get("/api/repos/{slug}/publish-plan")
 def publish_plan(slug: str):
     try:
-        return RepoService.deployment_plan(slug)
+        plan = RepoService.deployment_plan(slug)
+        plan["ftp_directory"] = FtpService.get_project_directory(slug)
+        plan["ftp_configured"] = FtpService.get_settings()["password_saved"]
+        return plan
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
