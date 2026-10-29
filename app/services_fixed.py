@@ -49,22 +49,24 @@ class RepoService:
 
     @staticmethod
     def git_info(path: Path) -> dict[str, Any]:
-        result = {"git_status": "not-cloned", "has_update": False, "ahead": 0, "behind": 0, "last_commit": "", "last_commit_at": ""}
+        result = {"git_status": "not-cloned", "has_update": False, "ahead": 0, "behind": 0, "last_commit": "", "last_commit_at": "", "sync_checked": False, "sync_error": "", "dirty": False}
         if not path.exists():
             return result
         if not (path / ".git").exists():
             result["git_status"] = "not-git"
             return result
         try:
-            result["git_status"] = "local-changes" if RepoService.run_command(["git", "status", "--short"], path) else "clean"
+            result["dirty"] = bool(RepoService.run_command(["git", "status", "--short"], path))
+            result["git_status"] = "local-changes" if result["dirty"] else "clean"
             result["last_commit"] = RepoService.run_command(["git", "log", "-1", "--pretty=%s"], path)
             result["last_commit_at"] = RepoService.run_command(["git", "log", "-1", "--pretty=%cI"], path)
             RepoService.run_command(["git", "fetch", "--quiet"], path, timeout=30)
             counts = RepoService.run_command(["git", "rev-list", "--left-right", "--count", "HEAD...@{u}"], path)
             ahead, behind = [int(v) for v in counts.split()]
-            result.update({"ahead": ahead, "behind": behind, "has_update": behind > 0})
-        except Exception:
-            pass
+            result.update({"ahead": ahead, "behind": behind, "has_update": behind > 0, "sync_checked": True})
+        except Exception as exc:
+            result["git_status"] = "local-changes" if result["dirty"] else "check-failed"
+            result["sync_error"] = str(exc)
         return result
 
     @staticmethod
@@ -96,7 +98,7 @@ class RepoService:
             "is_live": bool(deployment.get("public_url")),
             "public_url": deployment.get("public_url") or "",
             "deployment_provider": deployment.get("provider") or "",
-            "deploy_ready": bool(manifest) and info["git_status"] == "clean" and not info["has_update"],
+            "deploy_ready": bool(manifest) and info["sync_checked"] and info["git_status"] == "clean" and info["ahead"] == 0 and not info["has_update"],
             "deploy_checks": {},
             "changelog_summary": info.get("last_commit") or "",
             "updated_at": entry.get("updated_at") or info.get("last_commit_at") or "",
@@ -180,7 +182,7 @@ class RepoService:
         if not path.exists():
             RepoService.run_command(["git", "clone", repo["repo_url"], str(path)], RepoService.get_repo_root(), timeout=180)
         else:
-            if repo["git_status"] == "local-changes":
+            if repo.get("dirty") or repo["git_status"] == "local-changes":
                 raise RuntimeError("Lokale wijzigingen gevonden. Update is geblokkeerd.")
             RepoService.run_command(["git", "pull", "--ff-only"], path)
         return RepoService.get_repo(slug)
@@ -189,7 +191,11 @@ class RepoService:
     def run_tests(slug: str) -> dict[str, Any]:
         repo = RepoService.get_repo(slug)
         path = Path(repo["local_path"])
-        process = subprocess.run("python -m pytest -q", cwd=str(path), shell=True, capture_output=True, text=True, timeout=300)
+        manifest = RepoService.read_json(path / "turbo-project.json")
+        command = (manifest.get("testing") or {}).get("command")
+        if not command:
+            raise RuntimeError("Geen testcommando geconfigureerd in turbo-project.json.")
+        process = subprocess.run(command, cwd=str(path), shell=isinstance(command, str), capture_output=True, text=True, timeout=300)
         return {"ok": process.returncode == 0, "output": (process.stdout + "\n" + process.stderr).strip()[-5000:]}
 
     @staticmethod
