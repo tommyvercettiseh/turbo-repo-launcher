@@ -192,7 +192,13 @@ class RepoService:
         repo = RepoService.get_repo(slug)
         path = Path(repo["local_path"])
         manifest = RepoService.read_json(path / "turbo-project.json")
-        command = (manifest.get("testing") or {}).get("command")
+        command = (manifest.get("testing") or {}).get("command") or manifest.get("test_command")
+        if not command:
+            package = RepoService.read_json(path / "package.json")
+            if (package.get("scripts") or {}).get("test"):
+                command = "npm test"
+            elif (path / "tests").is_dir() and any((path / "tests").rglob("test_*.py")):
+                command = [sys.executable, "-m", "pytest", "-q"]
         if not command:
             raise RuntimeError("Geen testcommando geconfigureerd in turbo-project.json.")
         process = subprocess.run(command, cwd=str(path), shell=isinstance(command, str), capture_output=True, text=True, timeout=300)
