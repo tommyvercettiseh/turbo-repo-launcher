@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+import sys
 
 import pytest
 from app.services_fixed import RepoService
@@ -48,3 +49,24 @@ def test_missing_test_command_is_explicit(tmp_path, monkeypatch):
     monkeypatch.setattr(RepoService, 'get_repo', lambda slug: {'local_path': str(tmp_path)})
     with pytest.raises(RuntimeError, match='Geen testcommando'):
         RepoService.run_tests('web')
+
+
+def test_legacy_python_projects_keep_their_test_button(tmp_path, monkeypatch):
+    (tmp_path / 'tests').mkdir()
+    (tmp_path / 'tests' / 'test_app.py').write_text('def test_app(): pass')
+    monkeypatch.setattr(RepoService, 'get_repo', lambda slug: {'local_path': str(tmp_path)})
+    seen = []
+    monkeypatch.setattr('app.services_fixed.subprocess.run', lambda command, **kw:
+                        seen.append(command) or SimpleNamespace(returncode=0, stdout='', stderr=''))
+    assert RepoService.run_tests('legacy')['ok']
+    assert seen == [[sys.executable, '-m', 'pytest', '-q']]
+
+
+def test_npm_projects_work_without_a_hub_manifest(tmp_path, monkeypatch):
+    (tmp_path / 'package.json').write_text('{"scripts":{"test":"node --test"}}')
+    monkeypatch.setattr(RepoService, 'get_repo', lambda slug: {'local_path': str(tmp_path)})
+    seen = []
+    monkeypatch.setattr('app.services_fixed.subprocess.run', lambda command, **kw:
+                        seen.append(command) or SimpleNamespace(returncode=0, stdout='', stderr=''))
+    assert RepoService.run_tests('web')['ok']
+    assert seen == ['npm test']
